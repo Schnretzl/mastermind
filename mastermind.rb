@@ -79,13 +79,18 @@ def prompt_for_valid_game_type
 end
 
 def prompt_for_valid_code
-  puts 'Please enter the 4 character code (colors (r)ed, (g)reen, (y)ellow, (o)range, (g)reen, and (p)urple):'
+  puts 'Please enter the 4 character code (colors (r)ed, (b)lue, (y)ellow, (o)range, (g)reen, and (p)urple):'
   code = $stdin.gets.chomp.downcase
   unless code.match(/^[rbyogp]+$/) && code.length == 4
-    puts 'Please enter only a 4 character code using valid colors ((r)ed, (g)reen, (y)ellow, (o)range, (g)reen, and (p)urple)'
+    puts 'Please enter only a 4 character code using valid colors ((r)ed, (b)lue, (y)ellow, (o)range, (g)reen, and (p)urple)'
     code = $stdin.gets.chomp.downcase
   end
   code
+end
+
+def generate_random_code
+  colors = %w[r b y o g p]
+  random_color = colors.sample(4).join
 end
 
 def game()
@@ -93,8 +98,9 @@ def game()
   play_type = prompt_for_valid_game_type
 
   if play_type == 'm'
-    puts 'Please enter the 4 character code (colors (r)ed, (g)reen, (y)ellow, (o)range, (g)reen, and (p)urple):'
-    code = prompt_for_valid_code()
+    code = prompt_for_valid_code
     cpu_guess(Board.new(code))
-  end
+  else
+    #code type = b
+    code = generate_random_code
 end
