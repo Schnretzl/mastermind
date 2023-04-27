@@ -11,7 +11,15 @@ class Board
     answer.clear
     check_correct_locations(guess)
     check_incorrect_locations(guess)
-    display_guess_and_answer(guess)
+  end
+
+  def display_guess_and_answer(guess)
+    char_to_color_key = { 'r' => :red, 'b' => :blue, 'y' => :yellow, 'o' => :orange, 'g' => :green, 'p' => :purple, 'w' => :white }
+
+    guess_display = guess.map { |char| char.colorize(:background => char_to_color_key[char]) }.join(' ')
+    answer_display = answer.map { |char| char.colorize(:background => char_to_color_key[char]) }.join(' ')
+
+    puts "#{guess_display}   #{answer_display}"
   end
 
   private
@@ -47,14 +55,37 @@ class Board
       end
     end
   end
+end
 
-  def display_guess_and_answer(guess)
-    char_to_color_key = { 'r' => :red, 'b' => :blue, 'y' => :yellow, 'o' => :orange, 'g' => :green, 'p' => :purple, 'w' => :white }
+def cpu_guess(board)
+  colors = %w[r b y o g p]
+  combinations = colors.product(colors, colors, colors).map(&:join)
+  count_of_each_color = {r: 0, b: 0, y: 0, o: 0, g: 0, p: 0}
+  guess = 'rrrr'
+  
 
-    guess_display = guess.map { |char| char.colorize(:background => char_to_color_key[char]) }.join(' ')
-    answer_display = answer.map { |char| char.colorize(:background => char_to_color_key[char]) }.join(' ')
+  while answer != 'rrrr' do
+    answer = board.check_guess(guess)
+  end
 
-    puts "#{guess_display}   #{answer_display}"
+end
+
+def game
+  puts 'Play as code (b)reaker or (m)aker'
+  play_type = STDIN.gets.chomp.downcase
+  while play_type != 'b' && play_type != 'm'
+    puts 'Invalid play type, please enter \'b\' or \'m\''
+    play_type = STDIN.gets.chomp.downcase
+  end
+
+  if play_type == 'm'
+    puts 'Please enter the 4 character code (colors (r)ed, (g)reen, (y)ellow, (o)range, (g)reen, and (p)urple):'
+    code = $stdin.gets.chomp.downcase
+    unless code.match(/^[rbyogp]+$/) && code.length == 4
+      puts 'Please enter only a 4 character code using valid colors ((r)ed, (g)reen, (y)ellow, (o)range, (g)reen, and (p)urple)'
+      code = $stdin.gets.chomp.downcase
+    end
+    cpu_guess(Board.new(code))
   end
 
 end
