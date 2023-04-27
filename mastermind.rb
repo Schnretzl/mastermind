@@ -62,7 +62,6 @@ def cpu_guess(board)
   combinations = colors.product(colors, colors, colors).map(&:join)
   count_of_each_color = {r: 0, b: 0, y: 0, o: 0, g: 0, p: 0}
   guess = 'rrrr'
-  
 
   while answer != 'rrrr' do
     answer = board.check_guess(guess)
@@ -70,22 +69,32 @@ def cpu_guess(board)
 
 end
 
-def game
-  puts 'Play as code (b)reaker or (m)aker'
-  play_type = STDIN.gets.chomp.downcase
+def prompt_for_valid_game_type
+  play_type = $stdin.gets.chomp.downcase
   while play_type != 'b' && play_type != 'm'
     puts 'Invalid play type, please enter \'b\' or \'m\''
-    play_type = STDIN.gets.chomp.downcase
+    play_type = $stdin.gets.chomp.downcase
   end
+  play_type
+end
+
+def prompt_for_valid_code
+  puts 'Please enter the 4 character code (colors (r)ed, (g)reen, (y)ellow, (o)range, (g)reen, and (p)urple):'
+  code = $stdin.gets.chomp.downcase
+  unless code.match(/^[rbyogp]+$/) && code.length == 4
+    puts 'Please enter only a 4 character code using valid colors ((r)ed, (g)reen, (y)ellow, (o)range, (g)reen, and (p)urple)'
+    code = $stdin.gets.chomp.downcase
+  end
+  code
+end
+
+def game()
+  puts 'Play as code (b)reaker or (m)aker'
+  play_type = prompt_for_valid_game_type
 
   if play_type == 'm'
     puts 'Please enter the 4 character code (colors (r)ed, (g)reen, (y)ellow, (o)range, (g)reen, and (p)urple):'
-    code = $stdin.gets.chomp.downcase
-    unless code.match(/^[rbyogp]+$/) && code.length == 4
-      puts 'Please enter only a 4 character code using valid colors ((r)ed, (g)reen, (y)ellow, (o)range, (g)reen, and (p)urple)'
-      code = $stdin.gets.chomp.downcase
-    end
+    code = prompt_for_valid_code()
     cpu_guess(Board.new(code))
   end
-
 end
