@@ -26,10 +26,9 @@ class Board
 
   def display_guess_and_answer(guess)
     char_to_color_key = { 'r' => :red, 'b' => :blue, 'y' => :yellow, 'o' => :orange, 'g' => :green, 'p' => :purple, 'w' => :white }
-    char_to_color_key = char_to_color_key.transform_keys(&:to_sym)
 
-    guess_display = guess.split('').map { |char| char.colorize(:background => char_to_color_key[char]) }
-    answer_display = answer.map { |char| char.colorize(:background => char_to_color_key[char]) }
+    guess_display = guess.split('').map { |char| char.colorize(:background => char_to_color_key[char]) }.join(' ')
+    answer_display = @answer.map { |char| char.colorize(:background => char_to_color_key[char]) }.join(' ')
 
     puts "#{guess_display}   #{answer_display}"
   end
@@ -87,14 +86,14 @@ def player_guess(game_board)
     puts "Guess number #{guess_number}:"
 
     if game_board.correct?(guess)
-      puts "Correct! You got the code in #{guess_number} guesses."
+      puts "Correct! You got the code #{game_board.code} in #{guess_number} guesses."
       break
     end
 
     game_board.check_guess(guess)
 
     if guess_number == MAX_GUESSES
-      puts "Game over. You didn't guess the code in time."
+      puts "Game over. You didn't guess the code in time.  Code was #{game_board.code}"
       break
     end
 
