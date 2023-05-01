@@ -66,7 +66,12 @@ def cpu_guess(board)
   while answer != 'rrrr' do
     answer = board.check_guess(guess)
   end
+end
 
+def player_guess
+  guess_number = 1
+  puts 'Guess number #{guess_number}:'
+  guess = prompt_for_valid_code('guess')
 end
 
 def prompt_for_valid_game_type
@@ -78,11 +83,11 @@ def prompt_for_valid_game_type
   play_type
 end
 
-def prompt_for_valid_code
-  puts 'Please enter the 4 character code (colors (r)ed, (b)lue, (y)ellow, (o)range, (g)reen, and (p)urple):'
+def prompt_for_valid_code(prompt_type)
+  puts 'Please enter the 4 character #{prompt_type} (colors (r)ed, (b)lue, (y)ellow, (o)range, (g)reen, and (p)urple):'
   code = $stdin.gets.chomp.downcase
   unless code.match(/^[rbyogp]+$/) && code.length == 4
-    puts 'Please enter only a 4 character code using valid colors ((r)ed, (b)lue, (y)ellow, (o)range, (g)reen, and (p)urple)'
+    puts 'Please enter only a 4 character #{prompt_type} using valid colors ((r)ed, (b)lue, (y)ellow, (o)range, (g)reen, and (p)urple)'
     code = $stdin.gets.chomp.downcase
   end
   code
@@ -93,14 +98,15 @@ def generate_random_code
   random_color = colors.sample(4).join
 end
 
-def game()
+def game
   puts 'Play as code (b)reaker or (m)aker'
   play_type = prompt_for_valid_game_type
 
   if play_type == 'm'
-    code = prompt_for_valid_code
+    code = prompt_for_valid_code('code')
     cpu_guess(Board.new(code))
   else
-    #code type = b
     code = generate_random_code
+    player_guess(Board.new(code))
+  end
 end
