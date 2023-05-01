@@ -77,17 +77,25 @@ end
 def player_guess(game_board)
   guess_number = 1
   MAX_GUESSES = 12
+  guess = prompt_for_valid_code("guess")
   
-  for i in 1..MAX_GUESSES do
-    puts 'Guess number #{guess_number}:'
+  loop do
+    puts "Guess number #{guess_number}:"
+    guess = prompt_for_valid_code("guess")
+    
     if guess.correct?
-      puts "Correct!  You got the code in #{guess_number} guesses."
+      puts "Correct! You got the code in #{guess_number} guesses."
       break
     end
-    else do
-      game_board.check_correct_locations(guess)
-      game_board.display_guess_and_answer()
+    
+    game_board.check_guess(guess)
+    
+    if guess_number == MAX_GUESSES
+      puts "Game over. You didn't guess the code in time."
+      break
     end
+    
+    guess_number += 1
   end
 end
 
