@@ -1,3 +1,7 @@
+require 'colorize'
+
+MAX_GUESSES = 12
+
 class Board
   attr_accessor :code
   attr_reader :answer
@@ -19,19 +23,20 @@ class Board
   end
 
   private
-  
+
   def display_guess_and_answer(guess)
     char_to_color_key = { 'r' => :red, 'b' => :blue, 'y' => :yellow, 'o' => :orange, 'g' => :green, 'p' => :purple, 'w' => :white }
+    char_to_color_key = char_to_color_key.transform_keys(&:to_sym)
 
-    guess_display = guess.map { |char| char.colorize(:background => char_to_color_key[char]) }.join(' ')
-    answer_display = answer.map { |char| char.colorize(:background => char_to_color_key[char]) }.join(' ')
+    guess_display = guess.split('').map { |char| char.colorize(:background => char_to_color_key[char]) }
+    answer_display = answer.map { |char| char.colorize(:background => char_to_color_key[char]) }
 
     puts "#{guess_display}   #{answer_display}"
   end
 
   def check_correct_locations(guess)
-    guess.each_with_index do |color, index|
-      if color == guess[index]
+    guess.split('').each_with_index do |color, index|
+      if color == @code[index]
         answer << 'r'
       end
     end
@@ -41,20 +46,20 @@ class Board
     count_for_color_guess = Hash.new(0)
     count_for_color_code = Hash.new(0)
 
-    guess.each do |color|
+    guess.split('').each do |color|
       count_for_color_guess[color] += 1
     end
 
-    @code.each do |color|
+    @code.split('').each do |color|
       count_for_color_code[color] += 1
     end
 
-    guess.each_with_index do |color, index|
+    guess.split('').each_with_index do |color, index|
       if color == @code[index]
         next
       end
 
-      if count_for_color_guess[@code[index]] > count_for_color_code[@code[index]]
+      if count_for_color_guess[@code[index]] >= count_for_color_code[@code[index]]
         answer << 'w'
         count_for_color_guess[@code[index]] -= 1
       end
@@ -76,25 +81,23 @@ end
 
 def player_guess(game_board)
   guess_number = 1
-  MAX_GUESSES = 12
-  guess = prompt_for_valid_code("guess")
-  
+
   loop do
-    puts "Guess number #{guess_number}:"
     guess = prompt_for_valid_code("guess")
-    
-    if guess.correct?
+    puts "Guess number #{guess_number}:"
+
+    if game_board.correct?(guess)
       puts "Correct! You got the code in #{guess_number} guesses."
       break
     end
-    
+
     game_board.check_guess(guess)
-    
+
     if guess_number == MAX_GUESSES
       puts "Game over. You didn't guess the code in time."
       break
     end
-    
+
     guess_number += 1
   end
 end
@@ -109,10 +112,10 @@ def prompt_for_valid_game_type
 end
 
 def prompt_for_valid_code(prompt_type)
-  puts 'Please enter the 4 character #{prompt_type} (colors (r)ed, (b)lue, (y)ellow, (o)range, (g)reen, and (p)urple):'
+  puts "Please enter the 4 character #{prompt_type} (colors (r)ed, (b)lue, (y)ellow, (o)range, (g)reen, and (p)urple):"
   code = $stdin.gets.chomp.downcase
   unless code.match(/^[rbyogp]+$/) && code.length == 4
-    puts 'Please enter only a 4 character #{prompt_type} using valid colors ((r)ed, (b)lue, (y)ellow, (o)range, (g)reen, and (p)urple)'
+    puts "Please enter only a 4 character #{prompt_type} using valid colors ((r)ed, (b)lue, (y)ellow, (o)range, (g)reen, and (p)urple)"
     code = $stdin.gets.chomp.downcase
   end
   code
@@ -135,3 +138,5 @@ def game
     player_guess(Board.new(code))
   end
 end
+
+game
