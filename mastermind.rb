@@ -8,11 +8,18 @@ class Board
   end
 
   def check_guess(guess)
-    answer.clear
+    @answer.clear
     check_correct_locations(guess)
     check_incorrect_locations(guess)
+    display_guess_and_answer(guess)
   end
 
+  def correct?(guess)
+    guess == @code
+  end
+
+  private
+  
   def display_guess_and_answer(guess)
     char_to_color_key = { 'r' => :red, 'b' => :blue, 'y' => :yellow, 'o' => :orange, 'g' => :green, 'p' => :purple, 'w' => :white }
 
@@ -21,8 +28,6 @@ class Board
 
     puts "#{guess_display}   #{answer_display}"
   end
-
-  private
 
   def check_correct_locations(guess)
     guess.each_with_index do |color, index|
@@ -64,14 +69,26 @@ def cpu_guess(board)
   guess = 'rrrr'
 
   while answer != 'rrrr' do
+    
     answer = board.check_guess(guess)
   end
 end
 
-def player_guess
+def player_guess(game_board)
   guess_number = 1
-  puts 'Guess number #{guess_number}:'
-  guess = prompt_for_valid_code('guess')
+  MAX_GUESSES = 12
+  
+  for i in 1..MAX_GUESSES do
+    puts 'Guess number #{guess_number}:'
+    if guess.correct?
+      puts "Correct!  You got the code in #{guess_number} guesses."
+      break
+    end
+    else do
+      game_board.check_correct_locations(guess)
+      game_board.display_guess_and_answer()
+    end
+  end
 end
 
 def prompt_for_valid_game_type
