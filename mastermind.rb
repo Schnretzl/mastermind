@@ -76,17 +76,24 @@ class CpuGuess
     @eliminated_locations = []
   end
 
-
 end
 
-def cpu_guess_game(board)
+def cpu_guess_game(game_board)
   colors = [CpuGuess.new('r'), CpuGuess.new('b'), CpuGuess.new('y'), CpuGuess.new('o'), CpuGuess.new('g'), CpuGuess.new('p')]
   guess = Array.new(4)
-  known = add_known_colors_to_guess(colors)
-  unknown = add_unknown_colors_to_guess(colors)
-  guess = [known, unknown].compact.flatten
-  fill_empty_locations(colors, guess)
-  board.check_guess(guess.join)
+  guess_number = 1
+  
+  loop do
+    puts "Guess number #{guess_number}:"
+    guess = generate_guess(game_board, colors)
+    game_board.check_guess(guess.join)
+    if guess_number == MAX_GUESSES
+      puts "CPU didn't guess the code!"
+      break
+    end
+    guess_number += 1
+
+  end
 end
 
 def player_guess_game(game_board)
@@ -96,8 +103,7 @@ def player_guess_game(game_board)
     guess = prompt_for_valid_code("guess")
     puts "Guess number #{guess_number}:"
 
-    if game_board.correct?(guess)
-      puts "Correct! You got the code #{game_board.code} in #{guess_number} guesses."
+    if win?(game_board, guess)
       break
     end
 
@@ -119,7 +125,7 @@ def add_known_colors_to_guess(colors)
       guess[location] = color.color
     end
   end
-  return guess
+  guess
 end
 
 def add_unknown_colors_to_guess(colors)
@@ -130,6 +136,7 @@ def add_unknown_colors_to_guess(colors)
         if color.known_locations.include?(i)
           next
         end
+
         guess << color.color
         if guess.length == 4
           return guess
@@ -137,7 +144,7 @@ def add_unknown_colors_to_guess(colors)
       end
     end
   end
-  return guess
+  guess
 end
 
 def fill_empty_locations(colors, guess)
@@ -171,6 +178,22 @@ end
 def generate_random_code
   colors = %w[r b y o g p]
   random_color = colors.sample(4).join
+end
+
+def win?(board, guess)
+  if game_board.correct?(guess)
+    puts "Correct! You got the code #{game_board.code} in #{guess_number} guesses."
+    true
+  end
+  false
+end
+
+def generate_guess(game_board, colors)
+  known = add_known_colors_to_guess(colors)
+  unknown = add_unknown_colors_to_guess(colors)
+  guess = [known, unknown].compact.flatten
+  fill_empty_locations(colors, guess)
+  guess
 end
 
 def game
