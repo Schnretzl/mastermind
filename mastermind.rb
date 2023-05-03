@@ -67,11 +67,11 @@ class Board
 end
 
 class CpuGuess
-  attr_accessor: color, occurrences, known_locations
+  attr_accessor :color, :occurrences, :known_locations
 
   def initialize(color)
     @color = color
-    @occurrences = 0
+    @occurrences = nil
     @known_locations = []
     @eliminated_locations = []
   end
@@ -81,11 +81,12 @@ end
 
 def cpu_guess_game(board)
   colors = [CpuGuess.new('r'), CpuGuess.new('b'), CpuGuess.new('y'), CpuGuess.new('o'), CpuGuess.new('g'), CpuGuess.new('p')]
-  
-  add_known_colors_to_guess(colors)
-  add_unknown_colors_to_guess(colors)
-
-  
+  guess = Array.new(4)
+  known = add_known_colors_to_guess(colors)
+  unknown = add_unknown_colors_to_guess(colors)
+  guess = [known, unknown].compact.flatten
+  fill_empty_locations(colors, guess)
+  board.check_guess(guess.join)
 end
 
 def player_guess_game(game_board)
@@ -124,14 +125,28 @@ end
 def add_unknown_colors_to_guess(colors)
   guess = []
   colors.each do |color|
-    for i in 0..color.occurrences do
-      if color.known_locations.include?(i)
-        next
+    if color.occurrences.nil? || color.occurrences > 0
+      for i in 0..color.occurrences do
+        if color.known_locations.include?(i)
+          next
+        end
+        guess << color.color
+        if guess.length == 4
+          return guess
+        end
       end
-      guess << color.color
     end
   end
   return guess
+end
+
+def fill_empty_locations(colors, guess)
+  colors.each_with_index do |color, index|
+    if colors[index].nil? || color.occurrences == 0
+      guess[index] = color.color
+    end
+  end
+  guess
 end
 
 def prompt_for_valid_game_type
