@@ -66,19 +66,30 @@ class Board
   end
 end
 
-def cpu_guess(board)
-  colors = %w[r b y o g p]
-  combinations = colors.product(colors, colors, colors).map(&:join)
-  count_of_each_color = {r: 0, b: 0, y: 0, o: 0, g: 0, p: 0}
-  guess = 'rrrr'
+class CpuGuess
+  attr_accessor: color, occurrences, known_locations
 
-  while answer != 'rrrr' do
-    
-    answer = board.check_guess(guess)
+  def initialize(color)
+    @color = color
+    @occurrences = 0
+    @known_locations = []
+    @eliminated_locations = []
   end
+
+
 end
 
-def player_guess(game_board)
+def cpu_guess_game(board)
+  colors = [CpuGuess.new('r'), CpuGuess.new('b'), CpuGuess.new('y'), CpuGuess.new('o'), CpuGuess.new('g'), CpuGuess.new('p')]
+  
+  loop do
+  
+  end
+
+  
+end
+
+def player_guess_game(game_board)
   guess_number = 1
 
   loop do
@@ -131,10 +142,10 @@ def game
 
   if play_type == 'm'
     code = prompt_for_valid_code('code')
-    cpu_guess(Board.new(code))
+    cpu_guess_game(Board.new(code))
   else
     code = generate_random_code
-    player_guess(Board.new(code))
+    player_guess_game(Board.new(code))
   end
 end
 
