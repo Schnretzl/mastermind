@@ -82,9 +82,8 @@ end
 def cpu_guess_game(board)
   colors = [CpuGuess.new('r'), CpuGuess.new('b'), CpuGuess.new('y'), CpuGuess.new('o'), CpuGuess.new('g'), CpuGuess.new('p')]
   
-  loop do
-  
-  end
+  add_known_colors_to_guess(colors)
+  add_unknown_colors_to_guess(colors)
 
   
 end
@@ -110,6 +109,29 @@ def player_guess_game(game_board)
 
     guess_number += 1
   end
+end
+
+def add_known_colors_to_guess(colors)
+  guess = []
+  colors.each do |color|
+    color.known_locations.each do |location|
+      guess[location] = color.color
+    end
+  end
+  return guess
+end
+
+def add_unknown_colors_to_guess(colors)
+  guess = []
+  colors.each do |color|
+    for i in 0..color.occurrences do
+      if color.known_locations.include?(i)
+        next
+      end
+      guess << color.color
+    end
+  end
+  return guess
 end
 
 def prompt_for_valid_game_type
