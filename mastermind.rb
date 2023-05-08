@@ -1,14 +1,15 @@
-require 'colorize'
+require 'rainbow'
 
 MAX_GUESSES = 12
 
 class Board
-  attr_accessor :code
+  attr_accessor :code, :guess_number
   attr_reader :answer
 
   def initialize(code)
     @code = code
     @answer = []
+    @guess_number = 1
   end
 
   def check_guess(guess)
@@ -25,10 +26,10 @@ class Board
   private
 
   def display_guess_and_answer(guess)
-    char_to_color_key = { 'r' => :red, 'b' => :blue, 'y' => :yellow, 'o' => :orange, 'g' => :green, 'p' => :purple, 'w' => :white }
+    char_to_color_key = { 'r' => :red, 'b' => :blue, 'y' => :yellow, 'o' => :orangered, 'g' => :green, 'p' => :purple, 'w' => :white }
 
-    guess_display = guess.split('').map { |char| char.colorize(:background => char_to_color_key[char]) }.join(' ')
-    answer_display = @answer.map { |char| char.colorize(:background => char_to_color_key[char]) }.join(' ')
+    guess_display = guess.split('').map { |char| Rainbow(char).bg(char_to_color_key[char]) }.join(' ')
+    answer_display = @answer.map { |char| Rainbow(char).bg(char_to_color_key[char]) }.join(' ')
 
     puts "#{guess_display}   #{answer_display}"
   end
@@ -81,17 +82,17 @@ end
 def cpu_guess_game(game_board)
   colors = [CpuGuess.new('r'), CpuGuess.new('b'), CpuGuess.new('y'), CpuGuess.new('o'), CpuGuess.new('g'), CpuGuess.new('p')]
   guess = Array.new(4)
-  guess_number = 1
-  
+
   loop do
-    puts "Guess number #{guess_number}:"
+    puts "Guess number #{game_board.guess_number}:"
     guess = generate_guess(game_board, colors)
     game_board.check_guess(guess.join)
-    if guess_number == MAX_GUESSES
+    if game_board.guess_number == MAX_GUESSES
       puts "CPU didn't guess the code!"
       break
     end
-    guess_number += 1
+    update_color_data(game_board, colors, guess)
+    game_board.guess_number += 1
 
   end
 end
@@ -101,7 +102,7 @@ def player_guess_game(game_board)
 
   loop do
     guess = prompt_for_valid_code("guess")
-    puts "Guess number #{guess_number}:"
+    puts "Guess number #{game_board.guess_number}:"
 
     if win?(game_board, guess)
       break
@@ -114,12 +115,12 @@ def player_guess_game(game_board)
       break
     end
 
-    guess_number += 1
+    game_board.guess_number += 1
   end
 end
 
 def add_known_colors_to_guess(colors)
-  guess = []
+  guess = Array.new(4)
   colors.each do |color|
     color.known_locations.each do |location|
       guess[location] = color.color
@@ -129,16 +130,17 @@ def add_known_colors_to_guess(colors)
 end
 
 def add_unknown_colors_to_guess(colors)
-  guess = []
+  guess = Array.new(4)
   colors.each do |color|
-    if color.occurrences.nil? || color.occurrences > 0
-      for i in 0..color.occurrences do
+    test = color.occurrences
+    if !color.occurrences.nil? && color.occurrences > 0
+      for i in 0..color.occurrences - 1 do
         if color.known_locations.include?(i)
           next
         end
 
         guess << color.color
-        if guess.length == 4
+        if guess.include?(nil)
           return guess
         end
       end
@@ -149,8 +151,15 @@ end
 
 def fill_empty_locations(colors, guess)
   colors.each_with_index do |color, index|
-    if colors[index].nil? || color.occurrences == 0
-      guess[index] = color.color
+    if color.occurrences.nil? || color.occurrences == 0
+      guess.each_with_index do |location, location_index|
+        if location.nil?
+          guess[location_index] = color.color
+          if !guess.include?(nil)
+            return guess
+          end
+        end
+      end
     end
   end
   guess
@@ -180,20 +189,45 @@ def generate_random_code
   random_color = colors.sample(4).join
 end
 
-def win?(board, guess)
+def win?(game_board, guess)
   if game_board.correct?(guess)
-    puts "Correct! You got the code #{game_board.code} in #{guess_number} guesses."
-    true
+    puts "Correct! You got the code #{game_board.code} in #{game_board.guess_number} guesses."
+    return true
   end
   false
 end
 
 def generate_guess(game_board, colors)
+  guess = Array.new(4)
   known = add_known_colors_to_guess(colors)
   unknown = add_unknown_colors_to_guess(colors)
-  guess = [known, unknown].compact.flatten
+  
+  known.each_with_index do |color, index|
+    guess[index] = color unless color.nil?
+  end
+
+  unknown.each_with_index do |color, index|
+    guess[index] = color unless color.nil?
+  end
+
   fill_empty_locations(colors, guess)
   guess
+end
+
+def update_color_data(game_board, colors, guess)
+  total_known_colors = 0
+  colors.each do |color|
+    total_known_colors += color.occurrences&.to_i || 0
+  end
+  if total_known_colors.nil? || total_known_colors < 4
+    colors.each do |color|
+      if color.occurrences.nil?
+        color.occurrences = game_board.answer.length - total_known_colors
+        break
+      end
+    end
+  end
+  colors
 end
 
 def game
