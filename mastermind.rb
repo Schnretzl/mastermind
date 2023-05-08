@@ -139,7 +139,7 @@ def add_unknown_colors_to_guess(colors)
           next
         end
 
-        guess << color.color
+        guess[i] = color.color
         if guess.include?(nil)
           return guess
         end
